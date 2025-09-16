@@ -1,30 +1,30 @@
-# render.yaml - Complete Render Blueprint Configuration
+# render.yaml - Fixed Python Version
 services:
   - type: web
     name: football-betting-app
     runtime: python3
-    plan: free  # Can upgrade to starter ($7/month) for better performance
-    region: oregon  # Choose: oregon, frankfurt, singapore
+    plan: free
+    region: oregon
     buildCommand: |
       pip install --upgrade pip
       pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --worker-class sync --max-requests 1000 --preload
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --worker-class sync --max-requests 1000 --preload
     healthCheckPath: /health
     
     # Auto-deploy settings
     autoDeploy: true
     branch: main
     
-    # Environment variables
+    # Fixed Python version
     envVars:
       - key: PYTHON_VERSION
-        value: "3.9.18"
+        value: "3.11.9"
       - key: FLASK_ENV
         value: production
       - key: SECRET_KEY
-        generateValue: true  # Render will generate a secure key
+        generateValue: true
       - key: WEB_CONCURRENCY
-        value: "2"
+        value: "1"
       - key: PORT
         fromService:
           type: web
@@ -35,9 +35,9 @@ services:
     disk:
       name: betting-data
       mountPath: /opt/render/project/src/data
-      sizeGB: 1  # 1GB free storage
+      sizeGB: 1
     
-    # Custom headers for security
+    # Security headers
     headers:
       - path: /*
         name: X-Frame-Options
@@ -51,25 +51,6 @@ services:
       - path: /*
         name: X-XSS-Protection
         value: "1; mode=block"
-    
-    # Routes configuration
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /
-
-# Optional: Add a database service (upgrade to paid plan required)
-# databases:
-#   - name: football-betting-db
-#     databaseName: football_betting
-#     user: betting_user
-#     plan: free  # PostgreSQL free tier (90 days)
-
-# Optional: Add Redis for caching (paid plans only)
-# - type: redis
-#   name: football-betting-cache
-#   plan: free
-#   maxmemoryPolicy: allkeys-lru
 
 # Build settings
 buildFilter:
@@ -77,19 +58,9 @@ buildFilter:
     - app.py
     - requirements.txt
     - templates/**
-    - static/**
   ignoredPaths:
     - "*.md"
     - "*.txt"
     - ".git/**"
     - "__pycache__/**"
     - "*.pyc"
-
-# Notifications (optional)
-# notifications:
-#   - type: email
-#     emails:
-#       - your-email@example.com
-#     events:
-#       - build-failure
-#       - deploy-failure
