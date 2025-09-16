@@ -1,0 +1,95 @@
+# render.yaml - Complete Render Blueprint Configuration
+services:
+  - type: web
+    name: football-betting-app
+    runtime: python3
+    plan: free  # Can upgrade to starter ($7/month) for better performance
+    region: oregon  # Choose: oregon, frankfurt, singapore
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --worker-class sync --max-requests 1000 --preload
+    healthCheckPath: /health
+    
+    # Auto-deploy settings
+    autoDeploy: true
+    branch: main
+    
+    # Environment variables
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.9.18"
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true  # Render will generate a secure key
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: PORT
+        fromService:
+          type: web
+          name: football-betting-app
+          property: port
+    
+    # Disk storage for SQLite database
+    disk:
+      name: betting-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1  # 1GB free storage
+    
+    # Custom headers for security
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: X-XSS-Protection
+        value: "1; mode=block"
+    
+    # Routes configuration
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /
+
+# Optional: Add a database service (upgrade to paid plan required)
+# databases:
+#   - name: football-betting-db
+#     databaseName: football_betting
+#     user: betting_user
+#     plan: free  # PostgreSQL free tier (90 days)
+
+# Optional: Add Redis for caching (paid plans only)
+# - type: redis
+#   name: football-betting-cache
+#   plan: free
+#   maxmemoryPolicy: allkeys-lru
+
+# Build settings
+buildFilter:
+  paths:
+    - app.py
+    - requirements.txt
+    - templates/**
+    - static/**
+  ignoredPaths:
+    - "*.md"
+    - "*.txt"
+    - ".git/**"
+    - "__pycache__/**"
+    - "*.pyc"
+
+# Notifications (optional)
+# notifications:
+#   - type: email
+#     emails:
+#       - your-email@example.com
+#     events:
+#       - build-failure
+#       - deploy-failure
