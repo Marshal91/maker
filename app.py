@@ -7,8 +7,7 @@ import json
 from datetime import datetime, timedelta
 import sqlite3
 from contextlib import contextmanager
-import pandas as pd
-import numpy as np
+import random
 import threading
 import time
 
@@ -21,7 +20,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-please-change-i
 app.config['DEBUG'] = False
 
 # Database setup for Render (uses persistent storage)
-DATABASE_PATH = '/opt/render/project/src/betting_analysis.db'
+DATABASE_PATH = '/opt/render/project/src/data/betting_analysis.db'
 if not os.path.exists(os.path.dirname(DATABASE_PATH)):
     DATABASE_PATH = 'betting_analysis.db'  # Fallback for local development
 
@@ -37,6 +36,9 @@ def get_db():
 def init_db():
     """Initialize database with required tables"""
     try:
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
+        
         with get_db() as conn:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS match_analysis (
@@ -144,9 +146,9 @@ class RenderOptimizedFootballAPI:
                     'awayTeam': match['awayTeam']['name'],
                     'league': match['competition']['name'],
                     'status': match['status'],
-                    'homeOdds': round(np.random.uniform(1.4, 4.0), 2),
-                    'drawOdds': round(np.random.uniform(2.8, 4.2), 2),
-                    'awayOdds': round(np.random.uniform(1.8, 5.5), 2),
+                    'homeOdds': round(random.uniform(1.4, 4.0), 2),
+                    'drawOdds': round(random.uniform(2.8, 4.2), 2),
+                    'awayOdds': round(random.uniform(1.8, 5.5), 2),
                     'source': 'football-data.org'
                 })
         return processed
@@ -162,9 +164,9 @@ class RenderOptimizedFootballAPI:
                 'awayTeam': fixture['teams']['away']['name'],
                 'league': fixture['league']['name'],
                 'status': fixture['fixture']['status']['short'],
-                'homeOdds': round(np.random.uniform(1.4, 4.0), 2),
-                'drawOdds': round(np.random.uniform(2.8, 4.2), 2),
-                'awayOdds': round(np.random.uniform(1.8, 5.5), 2),
+                'homeOdds': round(random.uniform(1.4, 4.0), 2),
+                'drawOdds': round(random.uniform(2.8, 4.2), 2),
+                'awayOdds': round(random.uniform(1.8, 5.5), 2),
                 'source': 'rapidapi'
             })
         return processed
@@ -222,9 +224,9 @@ class RenderOptimizedFootballAPI:
                 'awayTeam': away,
                 'league': league,
                 'status': 'SCHEDULED',
-                'homeOdds': round(np.random.uniform(1.5, 3.8), 2),
-                'drawOdds': round(np.random.uniform(2.9, 4.1), 2),
-                'awayOdds': round(np.random.uniform(1.8, 4.8), 2),
+                'homeOdds': round(random.uniform(1.5, 3.8), 2),
+                'drawOdds': round(random.uniform(2.9, 4.1), 2),
+                'awayOdds': round(random.uniform(1.8, 4.8), 2),
                 'source': 'render-optimized'
             })
         
@@ -266,15 +268,15 @@ class RenderTeamAnalyzer:
         is_elite = any(elite in team_name for elite in elite_teams)
         
         if is_elite:
-            confidence = np.random.randint(75, 90)
-            goals_for = round(np.random.uniform(2.0, 3.0), 1)
-            goals_against = round(np.random.uniform(0.8, 1.5), 1)
-            win_rate = np.random.randint(60, 80)
+            confidence = random.randint(75, 90)
+            goals_for = round(random.uniform(2.0, 3.0), 1)
+            goals_against = round(random.uniform(0.8, 1.5), 1)
+            win_rate = random.randint(60, 80)
         else:
-            confidence = np.random.randint(55, 75)
-            goals_for = round(np.random.uniform(1.3, 2.3), 1)
-            goals_against = round(np.random.uniform(1.1, 2.2), 1)
-            win_rate = np.random.randint(35, 65)
+            confidence = random.randint(55, 75)
+            goals_for = round(random.uniform(1.3, 2.3), 1)
+            goals_against = round(random.uniform(1.1, 2.2), 1)
+            win_rate = random.randint(35, 65)
         
         return {
             'recentForm': self.generate_form(),
@@ -282,7 +284,7 @@ class RenderTeamAnalyzer:
             'goalsAgainst': goals_against,
             'homeWinRate': win_rate,
             'awayWinRate': max(20, win_rate - 15),
-            'cleanSheets': np.random.randint(25, 65),
+            'cleanSheets': random.randint(25, 65),
             'confidence': confidence,
             'lastUpdated': now.strftime('%Y-%m-%d %H:%M'),
             'platform': 'Render.com'
@@ -290,8 +292,12 @@ class RenderTeamAnalyzer:
     
     def generate_form(self):
         """Generate recent form"""
-        results = np.random.choice(['W', 'D', 'L'], size=5, p=[0.45, 0.30, 0.25])
-        return '-'.join(results)
+        results = ['W', 'D', 'L']
+        weights = [0.45, 0.30, 0.25]
+        form = []
+        for _ in range(5):
+            form.append(random.choices(results, weights=weights)[0])
+        return '-'.join(form)
     
     def analyze_match(self, home_team, away_team):
         """Render-optimized match analysis"""
@@ -306,7 +312,7 @@ class RenderTeamAnalyzer:
             if home_strength > away_strength:
                 recommendation = {
                     'bet': f'{home_team} Win',
-                    'odds': round(np.random.uniform(1.4, 2.1), 2),
+                    'odds': round(random.uniform(1.4, 2.1), 2),
                     'confidence': min(85, 70 + strength_diff // 3),
                     'type': 'Single Bet',
                     'reasoning': f'{home_team} significantly stronger with home advantage'
@@ -314,7 +320,7 @@ class RenderTeamAnalyzer:
             else:
                 recommendation = {
                     'bet': f'{away_team} Win',
-                    'odds': round(np.random.uniform(1.7, 2.8), 2),
+                    'odds': round(random.uniform(1.7, 2.8), 2),
                     'confidence': min(80, 65 + strength_diff // 4),
                     'type': 'Value Bet',
                     'reasoning': f'{away_team} much stronger despite playing away'
@@ -322,7 +328,7 @@ class RenderTeamAnalyzer:
         else:
             recommendation = {
                 'bet': 'Both Teams to Score',
-                'odds': round(np.random.uniform(1.6, 2.1), 2),
+                'odds': round(random.uniform(1.6, 2.1), 2),
                 'confidence': 72,
                 'type': 'Alternative Market',
                 'reasoning': 'Evenly matched teams often produce goals'
