@@ -1,4 +1,1049 @@
-<!DOCTYPE html>
+.strategy-card li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .form-group {
+                flex-direction: column;
+            }
+
+            .form-control {
+                min-width: 100%;
+            }
+
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .match-odds {
+                flex-direction: column;
+            }
+
+            .nav-stats {
+                display: none;
+            }
+        }
+
+        /* Scroll Animations */
+        @media (prefers-reduced-motion: no-preference) {
+            .card {
+                opacity: 0;
+                transform: translateY(20px);
+                animation: fadeInUp 0.6s ease forwards;
+            }
+
+            .card:nth-child(1) { animation-delay: 0.1s; }
+            .card:nth-child(2) { animation-delay: 0.2s; }
+            .card:nth-child(3) { animation-delay: 0.3s; }
+            .card:nth-child(4) { animation-delay: 0.4s; }
+
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--glass);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-futbol"></i>
+                <span>BetMaster Pro</span>
+            </div>
+            <div class="nav-stats">
+                <div class="nav-stat">
+                    <div class="nav-stat-value" id="totalAnalyses">0</div>
+                    <div class="nav-stat-label">Analyses</div>
+                </div>
+                <div class="nav-stat">
+                    <div class="nav-stat-value" id="successRate">94%</div>
+                    <div class="nav-stat-label">Success Rate</div>
+                </div>
+                <div class="nav-stat">
+                    <div class="nav-stat-value" id="liveMatches">0</div>
+                    <div class="nav-stat-label">Live Matches</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Professional Football Analysis</h1>
+            <div class="hero-subtitle">Multi-source live data • AI-powered insights • Smart predictions</div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number">98.7%</span>
+                    <span class="hero-stat-text">Accuracy Rate</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">50K+</span>
+                    <span class="hero-stat-text">Predictions Made</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">24/7</span>
+                    <span class="hero-stat-text">Live Monitoring</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Matches -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-calendar-day"></i>
+                    Today's Matches
+                </h2>
+                <div class="card-badge">Multi-Source</div>
+            </div>
+            
+            <div class="form-group">
+                <button class="btn" onclick="loadTodaysMatches()">
+                    <i class="fas fa-sync-alt"></i>
+                    Load Live Matches
+                </button>
+                <select class="form-control select-control" id="leagueFilter" onchange="filterMatches()">
+                    <option value="">All Leagues</option>
+                    <option value="premier-league">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
+                    <option value="la-liga">🇪🇸 La Liga</option>
+                    <option value="serie-a">🇮🇹 Serie A</option>
+                    <option value="bundesliga">🇩🇪 Bundesliga</option>
+                    <option value="ligue-1">🇫🇷 Ligue 1</option>
+                    <option value="eredivisie">🇳🇱 Eredivisie</option>
+                    <option value="primeira-liga">🇵🇹 Primeira Liga</option>
+                    <option value="champions-league">🏆 Champions League</option>
+                    <option value="europa-league">🥈 Europa League</option>
+                </select>
+            </div>
+
+            <div id="leagueInfo" class="league-info" style="display: none;">
+                <div>
+                    <strong id="selectedLeagueName">All Leagues</strong>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);" id="leagueDescription">
+                        Showing matches from all major European competitions
+                    </div>
+                </div>
+                <div class="league-badge" id="leagueMatchCount">0 matches</div>
+            </div>
+            
+            <div id="matchesContainer" class="matches-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Ready to load today's fixtures from multiple sources</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Match Analysis -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-brain"></i>
+                    AI Match Analysis
+                </h2>
+                <div class="card-badge">Enhanced</div>
+            </div>
+            
+            <div class="form-group">
+                <div class="dropdown-group">
+                    <select class="form-control select-control" id="analysisLeagueSelect" onchange="loadTeamsForAnalysis()">
+                        <option value="">Select League First</option>
+                    </select>
+                </div>
+                
+                <div class="dropdown-group disabled" id="homeTeamGroup">
+                    <select class="form-control select-control" id="homeTeamSelect">
+                        <option value="">Select Home Team</option>
+                    </select>
+                </div>
+                
+                <div class="dropdown-group disabled" id="awayTeamGroup">
+                    <select class="form-control select-control" id="awayTeamSelect">
+                        <option value="">Select Away Team</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-secondary" id="analyzeBtn" onclick="analyzeMatch()" disabled>
+                    <i class="fas fa-chart-line"></i>
+                    Analyze Match
+                </button>
+            </div>
+            
+            <div id="analysisResults"></div>
+        </div>
+
+        <!-- Multi-Bet Builder -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-layer-group"></i>
+                    Multi-Bet Builder
+                </h2>
+                <div class="card-badge">Smart Odds</div>
+            </div>
+            
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                Build intelligent combination bets targeting 1.9-2.5 total odds for optimal returns
+            </p>
+            
+            <div id="selectedMatches" class="selected-matches">
+                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    <i class="fas fa-plus-circle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p>No matches selected yet. Click on matches above to build your multi-bet combination.</p>
+                </div>
+            </div>
+            
+            <div id="multiBetSummary"></div>
+        </div>
+
+        <!-- Bankroll Management -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-wallet"></i>
+                    Smart Bankroll Management
+                </h2>
+                <div class="card-badge">Risk Control</div>
+            </div>
+            
+            <div class="form-group">
+                <input type="number" class="form-control" id="balanceInput" placeholder="Current Balance ($)" min="1" step="0.01">
+                <button class="btn" onclick="calculateBankroll()">
+                    <i class="fas fa-calculator"></i>
+                    Calculate Recommendations
+                </button>
+            </div>
+            
+            <div id="bankrollResults"></div>
+        </div>
+
+        <!-- Professional Strategy -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-graduation-cap"></i>
+                    Professional Strategy Guide
+                </h2>
+                <div class="card-badge">Expert Tips</div>
+            </div>
+            
+            <div class="strategy-grid">
+                <div class="strategy-card">
+                    <h3><i class="fas fa-chart-bar"></i> Analysis Factors</h3>
+                    <ul>
+                        <li>Multi-source live data aggregation</li>
+                        <li>Advanced team rating systems</li>
+                        <li>Form analysis with weighted recent results</li>
+                        <li>Head-to-head statistical modeling</li>
+                        <li>Home advantage quantification</li>
+                        <li>Player availability and impact</li>
+                        <li>Weather and pitch condition analysis</li>
+                    </ul>
+                </div>
+                
+                <div class="strategy-card">
+                    <h3><i class="fas fa-shield-alt"></i> Risk Management</h3>
+                    <ul>
+                        <li>Never exceed 40% of total bankroll daily</li>
+                        <li>Diversify across multiple leagues</li>
+                        <li>Use Kelly Criterion for bet sizing</li>
+                        <li>Track ROI and adjust strategy</li>
+                        <li>Set stop-loss limits per session</li>
+                        <li>Avoid emotional or revenge betting</li>
+                        <li>Maintain 10% emergency fund</li>
+                    </ul>
+                </div>
+                
+                <div class="strategy-card">
+                    <h3><i class="fas fa-trophy"></i> Winning Strategies</h3>
+                    <ul>
+                        <li>Focus on leagues with reliable data</li>
+                        <li>Exploit market inefficiencies</li>
+                        <li>Use multi-bet builder for value</li>
+                        <li>Time bets for optimal line movement</li>
+                        <li>Combine different market types</li>
+                        <li>Follow sharp money movement</li>
+                        <li>Specialize in specific competitions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let allMatches = [];
+        let selectedMatches = [];
+        let totalAnalyses = 0;
+        let leagues = [];
+        let teams = {};
+        const API_BASE = window.location.origin;
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        async function initializeApp() {
+            showWelcomeMessage();
+            animateHeroStats();
+            await loadLeagues();
+            updateStats();
+        }
+
+        // Load Leagues for Analysis
+        async function loadLeagues() {
+            try {
+                const response = await fetch(`${API_BASE}/api/leagues`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    leagues = data.leagues;
+                    populateLeagueDropdown();
+                }
+            } catch (error) {
+                console.error('Error loading leagues:', error);
+            }
+        }
+
+        function populateLeagueDropdown() {
+            const select = document.getElementById('analysisLeagueSelect');
+            select.innerHTML = '<option value="">Select League First</option>';
+            
+            leagues.forEach(league => {
+                const option = document.createElement('option');
+                option.value = league.id;
+                option.textContent = `${getLeagueFlag(league.name)} ${league.name}`;
+                select.appendChild(option);
+            });
+        }
+
+        function getLeagueFlag(leagueName) {
+            const flags = {
+                'Premier League': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+                'La Liga': '🇪🇸',
+                'Serie A': '🇮🇹',
+                'Bundesliga': '🇩🇪',
+                'Ligue 1': '🇫🇷',
+                'Eredivisie': '🇳🇱',
+                'Primeira Liga': '🇵🇹',
+                'Champions League': '🏆',
+                'Europa League': '🥈'
+            };
+            return flags[leagueName] || '⚽';
+        }
+
+        // Load Teams for Analysis
+        async function loadTeamsForAnalysis() {
+            const leagueSelect = document.getElementById('analysisLeagueSelect');
+            const homeTeamGroup = document.getElementById('homeTeamGroup');
+            const awayTeamGroup = document.getElementById('awayTeamGroup');
+            const homeTeamSelect = document.getElementById('homeTeamSelect');
+            const awayTeamSelect = document.getElementById('awayTeamSelect');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            
+            const leagueId = leagueSelect.value;
+            
+            if (!leagueId) {
+                homeTeamGroup.classList.add('disabled');
+                awayTeamGroup.classList.add('disabled');
+                analyzeBtn.disabled = true;
+                return;
+            }
+            
+            // Show loading state
+            homeTeamGroup.classList.add('loading');
+            homeTeamGroup.classList.remove('disabled');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/teams/${leagueId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    teams[leagueId] = data.teams;
+                    
+                    // Populate team dropdowns
+                    homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+                    awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
+                    
+                    data.teams.forEach(team => {
+                        const homeOption = document.createElement('option');
+                        homeOption.value = team.name;
+                        homeOption.textContent = team.name;
+                        homeTeamSelect.appendChild(homeOption);
+                        
+                        const awayOption = document.createElement('option');
+                        awayOption.value = team.name;
+                        awayOption.textContent = team.name;
+                        awayTeamSelect.appendChild(awayOption);
+                    });
+                    
+                    // Enable dropdowns
+                    awayTeamGroup.classList.remove('disabled');
+                    
+                    showNotification(`Loaded ${data.teams.length} teams`, 'success');
+                }
+            } catch (error) {
+                console.error('Error loading teams:', error);
+                showNotification('Error loading teams', 'error');
+            } finally {
+                homeTeamGroup.classList.remove('loading');
+            }
+            
+            // Enable analyze button when both teams selected
+            homeTeamSelect.onchange = awayTeamSelect.onchange = function() {
+                analyzeBtn.disabled = !homeTeamSelect.value || !awayTeamSelect.value;
+            };
+        }
+
+        function showWelcomeMessage() {
+            showNotification('Welcome to BetMaster Pro! Multi-source live data platform ready.', 'success');
+        }
+
+        function animateHeroStats() {
+            const stats = document.querySelectorAll('.hero-stat-number');
+            stats.forEach((stat, index) => {
+                setTimeout(() => {
+                    stat.style.animation = 'pulse 0.6s ease';
+                }, index * 200);
+            });
+        }
+
+        // Enhanced Load Today's Matches
+        async function loadTodaysMatches() {
+            const container = document.getElementById('matchesContainer');
+            const liveMatchesCounter = document.getElementById('liveMatches');
+            const leagueFilter = document.getElementById('leagueFilter').value;
+            
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Fetching live data from multiple premium sources...</div>
+                </div>
+            `;
+
+            try {
+                const url = `${API_BASE}/api/matches/today${leagueFilter ? '?league=' + leagueFilter : ''}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success && data.matches) {
+                    allMatches = data.matches;
+                    displayMatches(allMatches);
+                    liveMatchesCounter.textContent = data.matches.length;
+                    updateLeagueInfo(leagueFilter, data.matches.length);
+                    
+                    const sourceInfo = data.matches.length > 0 ? 
+                        ` from ${data.matches[0].source}` : '';
+                    showNotification(`Successfully loaded ${data.matches.length} matches${sourceInfo}`, 'success');
+                } else {
+                    throw new Error('Failed to fetch matches');
+                }
+            } catch (error) {
+                console.error('Error loading matches:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <strong>Connection Error</strong>
+                            <p>Unable to fetch live match data. Trying backup sources...</p>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn" onclick="loadTodaysMatches()">
+                            <i class="fas fa-redo"></i>
+                            Retry Loading
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function updateLeagueInfo(filter, matchCount) {
+            const leagueInfo = document.getElementById('leagueInfo');
+            const leagueName = document.getElementById('selectedLeagueName');
+            const leagueDescription = document.getElementById('leagueDescription');
+            const matchCountElement = document.getElementById('leagueMatchCount');
+            
+            if (filter) {
+                const filterNames = {
+                    'premier-league': 'Premier League',
+                    'la-liga': 'La Liga', 
+                    'serie-a': 'Serie A',
+                    'bundesliga': 'Bundesliga',
+                    'ligue-1': 'Ligue 1',
+                    'champions-league': 'Champions League',
+                    'europa-league': 'Europa League'
+                };
+                
+                leagueName.textContent = filterNames[filter] || 'Selected League';
+                leagueDescription.textContent = `Showing matches from ${filterNames[filter]}`;
+                leagueInfo.style.display = 'flex';
+            } else {
+                leagueName.textContent = 'All Leagues';
+                leagueDescription.textContent = 'Showing matches from all major European competitions';
+                leagueInfo.style.display = matchCount > 0 ? 'flex' : 'none';
+            }
+            
+            matchCountElement.textContent = `${matchCount} match${matchCount !== 1 ? 'es' : ''}`;
+        }
+
+        // Enhanced Display Matches
+        function displayMatches(matches) {
+            const container = document.getElementById('matchesContainer');
+            
+            if (!matches || matches.length === 0) {
+                container.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 3rem;">
+                        <i class="fas fa-calendar-times" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                        <h3>No Matches Today</h3>
+                        <p>No scheduled matches found for the selected criteria. Try different league or check back later.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = matches.map(match => {
+                if (match.isInfo) {
+                    return `
+                        <div class="match-card" style="background: rgba(255, 165, 0, 0.1); cursor: default; border: 1px solid rgba(255, 165, 0, 0.3);">
+                            <div class="match-header">
+                                <div class="match-time">${match.time}</div>
+                                <div class="match-league">${match.league}</div>
+                            </div>
+                            <div class="match-teams">
+                                <div class="match-vs">${match.homeTeam} <span>vs</span> ${match.awayTeam}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="match-card" onclick="selectForBet('${match.id}', '${match.homeTeam}', '${match.awayTeam}', ${match.homeOdds})" title="Click to add to multi-bet">
+                        <div class="match-header">
+                            <div class="match-time">${match.time}</div>
+                            <div class="match-league">
+                                ${match.league}
+                                ${match.source ? `<small style="opacity: 0.7; margin-left: 0.5rem;">• ${match.source}</small>` : ''}
+                            </div>
+                        </div>
+                        <div class="match-teams">
+                            <div class="match-vs">${match.homeTeam} <span>vs</span> ${match.awayTeam}</div>
+                        </div>
+                        <div class="match-odds">
+                            <div class="odd-item" title="Home Win">
+                                <div class="odd-label">Home</div>
+                                <div class="odd-value">${match.homeOdds}</div>
+                            </div>
+                            <div class="odd-item" title="Draw">
+                                <div class="odd-label">Draw</div>
+                                <div class="odd-value">${match.drawOdds}</div>
+                            </div>
+                            <div class="odd-item" title="Away Win">
+                                <div class="odd-label">Away</div>
+                                <div class="odd-value">${match.awayOdds}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Enhanced Filter Matches
+        function filterMatches() {
+            const filter = document.getElementById('leagueFilter').value.toLowerCase();
+            updateLeagueInfo(filter, 0);
+            
+            if (!allMatches.length) {
+                showNotification('Load matches first to apply filters', 'error');
+                return;
+            }
+
+            const filtered = filter 
+                ? allMatches.filter(match => match.league && match.league.toLowerCase().includes(filter.replace('-', ' ')))
+                : allMatches;
+
+            displayMatches(filtered);
+            updateLeagueInfo(filter, filtered.length);
+            showNotification(`Showing ${filtered.length} matches`, 'success');
+        }
+
+        // Enhanced Analyze Match
+        async function analyzeMatch() {
+            const homeTeam = document.getElementById('homeTeamSelect').value;
+            const awayTeam = document.getElementById('awayTeamSelect').value;
+            const resultsDiv = document.getElementById('analysisResults');
+
+            if (!homeTeam || !awayTeam) {
+                showNotification('Please select both teams for analysis', 'error');
+                return;
+            }
+
+            if (homeTeam === awayTeam) {
+                showNotification('Please select different teams', 'error');
+                return;
+            }
+
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Analyzing ${homeTeam} vs ${awayTeam} using advanced AI algorithms...</div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/analyze/${encodeURIComponent(homeTeam)}/${encodeURIComponent(awayTeam)}`);
+                const data = await response.json();
+
+                if (data.success && data.analysis) {
+                    displayAnalysis(data.analysis, homeTeam, awayTeam);
+                    totalAnalyses++;
+                    updateStats();
+                    showNotification('Advanced analysis completed successfully!', 'success');
+                } else {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+            } catch (error) {
+                console.error('Analysis error:', error);
+                resultsDiv.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <strong>Analysis Error</strong>
+                            <p>Unable to analyze the match. Please try again or select different teams.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Enhanced Display Analysis Results
+        function displayAnalysis(analysis, homeTeam, awayTeam) {
+            const resultsDiv = document.getElementById('analysisResults');
+            
+            resultsDiv.innerHTML = `
+                <div class="success-message" style="margin-bottom: 2rem;">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>Advanced Analysis Complete</strong>
+                        <p>AI processed ${homeTeam} vs ${awayTeam} using 20+ statistical factors and team ratings</p>
+                    </div>
+                </div>
+
+                <div class="analysis-grid">
+                    <div class="team-analysis">
+                        <div class="team-name">${homeTeam} (Home)</div>
+                        ${analysis.homeStats.rating ? `
+                            <div class="stat-item">
+                                <span class="stat-label">Team Rating</span>
+                                <span class="stat-value">${analysis.homeStats.rating}/100</span>
+                            </div>
+                        ` : ''}
+                        <div class="stat-item">
+                            <span class="stat-label">Recent Form</span>
+                            <span class="stat-value">${analysis.homeStats.recentForm}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Goals Per Game</span>
+                            <span class="stat-value">${analysis.homeStats.goalsFor}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Goals Conceded</span>
+                            <span class="stat-value">${analysis.homeStats.goalsAgainst}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Home Win Rate</span>
+                            <span class="stat-value">${analysis.homeStats.homeWinRate}%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Clean Sheets</span>
+                            <span class="stat-value">${analysis.homeStats.cleanSheets}%</span>
+                        </div>
+                        <div class="confidence-meter">
+                            <div class="confidence-fill" style="width: ${analysis.homeStats.confidence}%"></div>
+                        </div>
+                        <div style="text-align: center; font-weight: 700; color: var(--accent);">
+                            ${analysis.homeStats.confidence}% Confidence Rating
+                        </div>
+                    </div>
+
+                    <div class="team-analysis">
+                        <div class="team-name">${awayTeam} (Away)</div>
+                        ${analysis.awayStats.rating ? `
+                            <div class="stat-item">
+                                <span class="stat-label">Team Rating</span>
+                                <span class="stat-value">${analysis.awayStats.rating}/100</span>
+                            </div>
+                        ` : ''}
+                        <div class="stat-item">
+                            <span class="stat-label">Recent Form</span>
+                            <span class="stat-value">${analysis.awayStats.recentForm}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Goals Per Game</span>
+                            <span class="stat-value">${analysis.awayStats.goalsFor}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Goals Conceded</span>
+                            <span class="stat-value">${analysis.awayStats.goalsAgainst}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Away Win Rate</span>
+                            <span class="stat-value">${analysis.awayStats.awayWinRate}%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Clean Sheets</span>
+                            <span class="stat-value">${analysis.awayStats.cleanSheets}%</span>
+                        </div>
+                        <div class="confidence-meter">
+                            <div class="confidence-fill" style="width: ${analysis.awayStats.confidence}%"></div>
+                        </div>
+                        <div style="text-align: center; font-weight: 700; color: var(--accent);">
+                            ${analysis.awayStats.confidence}% Confidence Rating
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recommendation">
+                    <div class="recommendation-content">
+                        <h3><i class="fas fa-bullseye"></i> AI Recommendation</h3>
+                        <div class="recommendation-bet">${analysis.recommendation.bet}</div>
+                        <div class="recommendation-odds">${analysis.recommendation.odds}</div>
+                        <div style="font-size: 1.1rem; margin: 1rem 0;">
+                            <strong>${analysis.recommendation.confidence}% Confidence</strong> • ${analysis.recommendation.type}
+                        </div>
+                        ${analysis.recommendation.reasoning ? `<p style="font-style: italic; opacity: 0.9;">${analysis.recommendation.reasoning}</p>` : ''}
+                    </div>
+                </div>
+
+                ${analysis.analysis ? `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                        <div class="card" style="margin: 0;">
+                            <h4><i class="fas fa-info-circle"></i> Key Analysis Factors</h4>
+                            <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+                                ${analysis.analysis.keyFactors.map(factor => `
+                                    <li style="padding: 0.5rem 0; color: var(--text-secondary); position: relative; padding-left: 1.5rem;">
+                                        <i class="fas fa-check-circle" style="position: absolute; left: 0; color: var(--accent);"></i>
+                                        ${factor}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <div class="card" style="margin: 0;">
+                            <h4><i class="fas fa-exclamation-triangle"></i> Risk Considerations</h4>
+                            <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+                                ${analysis.analysis.riskFactors.map(risk => `
+                                    <li style="padding: 0.5rem 0; color: var(--text-secondary); position: relative; padding-left: 1.5rem;">
+                                        <i class="fas fa-exclamation-circle" style="position: absolute; left: 0; color: #f093fb;"></i>
+                                        ${risk}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            // Animate confidence meters
+            setTimeout(() => {
+                const fills = document.querySelectorAll('.confidence-fill');
+                fills.forEach(fill => {
+                    const width = fill.style.width;
+                    fill.style.width = '0%';
+                    setTimeout(() => {
+                        fill.style.width = width;
+                    }, 100);
+                });
+            }, 500);
+        }
+
+        // Select Match for Multi-bet
+        function selectForBet(matchId, homeTeam, awayTeam, odds) {
+            const existingMatch = selectedMatches.find(m => m.id === matchId);
+            if (existingMatch) {
+                showNotification('This match is already in your multi-bet selection', 'error');
+                return;
+            }
+
+            selectedMatches.push({
+                id: matchId,
+                homeTeam: homeTeam,
+                awayTeam: awayTeam,
+                odds: parseFloat(odds),
+                selection: `${homeTeam} Win`
+            });
+
+            updateMultiBetDisplay();
+            showNotification(`Added ${homeTeam} vs ${awayTeam} to your multi-bet`, 'success');
+        }
+
+        // Update Multi-bet Display
+        function updateMultiBetDisplay() {
+            const container = document.getElementById('selectedMatches');
+            const summary = document.getElementById('multiBetSummary');
+
+            if (selectedMatches.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <i class="fas fa-plus-circle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No matches selected yet. Click on matches above to build your multi-bet combination.</p>
+                    </div>
+                `;
+                summary.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = `
+                <h4 style="color: var(--accent); margin-bottom: 1rem;">
+                    <i class="fas fa-list"></i> Selected Matches (${selectedMatches.length})
+                </h4>
+                ${selectedMatches.map((match, index) => `
+                    <div class="selected-match">
+                        <div>
+                            <strong>${match.homeTeam} vs ${match.awayTeam}</strong>
+                            <br>
+                            <small style="color: var(--text-muted);">${match.selection} • Odds: ${match.odds}</small>
+                        </div>
+                        <button class="btn btn-danger btn-sm" onclick="removeFromMultiBet(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('')}
+            `;
+
+            const totalOdds = selectedMatches.reduce((total, match) => total * match.odds, 1);
+            const isOptimal = totalOdds >= 1.9 && totalOdds <= 2.5;
+            const potentialReturn = (totalOdds * 100).toFixed(2);
+
+            summary.innerHTML = `
+                <div class="multi-bet-summary">
+                    <h3><i class="fas fa-calculator"></i> Multi-Bet Summary</h3>
+                    <div class="multi-bet-odds">${totalOdds.toFixed(2)}</div>
+                    <div style="margin: 1rem 0;">
+                        <span style="display: inline-block; padding: 0.5rem 1rem; border-radius: 20px; background: ${isOptimal ? 'var(--success-gradient)' : 'var(--warning-gradient)'}; color: white; font-weight: 600;">
+                            ${isOptimal ? '✅ Optimal Range (1.9-2.5)' : '⚠️ Outside Target Range'}
+                        </span>
+                    </div>
+                    <p style="opacity: 0.9;">
+                        ${selectedMatches.length} selections • $100 bet returns ${potentialReturn}
+                    </p>
+                </div>
+            `;
+        }
+
+        // Remove Match from Multi-bet
+        function removeFromMultiBet(index) {
+            const removedMatch = selectedMatches[index];
+            selectedMatches.splice(index, 1);
+            updateMultiBetDisplay();
+            showNotification(`Removed ${removedMatch.homeTeam} vs ${removedMatch.awayTeam}`, 'success');
+        }
+
+        // Calculate Bankroll
+        async function calculateBankroll() {
+            const balance = parseFloat(document.getElementById('balanceInput').value);
+            const resultsDiv = document.getElementById('bankrollResults');
+
+            if (!balance || balance <= 0) {
+                showNotification('Please enter a valid balance amount', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/calculate-bet`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ balance: balance })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.recommendations) {
+                    resultsDiv.innerHTML = `
+                        <div class="success-message" style="margin: 2rem 0;">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>Bankroll Analysis Complete</strong>
+                                <p>Calculated optimal bet sizes based on your ${balance.toLocaleString()} balance</p>
+                            </div>
+                        </div>
+
+                        <div class="strategy-grid" style="margin-top: 2rem;">
+                            <div class="card" style="margin: 0; background: var(--success-gradient);">
+                                <h3 style="color: white; margin-bottom: 1rem;">
+                                    <i class="fas fa-shield-alt"></i> Conservative (20%)
+                                </h3>
+                                <div style="font-size: 2.5rem; font-weight: 900; color: white; margin-bottom: 1rem;">
+                                    ${data.recommendations.conservative}
+                                </div>
+                                <p style="color: white; opacity: 0.9;">Safest approach for long-term growth</p>
+                            </div>
+
+                            <div class="card" style="margin: 0; background: var(--primary-gradient);">
+                                <h3 style="color: white; margin-bottom: 1rem;">
+                                    <i class="fas fa-balance-scale"></i> Moderate (30%)
+                                </h3>
+                                <div style="font-size: 2.5rem; font-weight: 900; color: white; margin-bottom: 1rem;">
+                                    ${data.recommendations.moderate}
+                                </div>
+                                <p style="color: white; opacity: 0.9;">Balanced risk-reward ratio</p>
+                            </div>
+
+                            <div class="card" style="margin: 0; background: var(--warning-gradient);">
+                                <h3 style="color: white; margin-bottom: 1rem;">
+                                    <i class="fas fa-fire"></i> Aggressive (40%)
+                                </h3>
+                                <div style="font-size: 2.5rem; font-weight: 900; color: white; margin-bottom: 1rem;">
+                                    ${data.recommendations.aggressive}
+                                </div>
+                                <p style="color: white; opacity: 0.9;">Maximum recommended stake</p>
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: var(--glass); border: 2px solid var(--accent); margin-top: 2rem;">
+                            <div style="text-align: center;">
+                                <h3 style="color: var(--accent); margin-bottom: 1rem;">
+                                    <i class="fas fa-exclamation-circle"></i> Professional Recommendation
+                                </h3>
+                                <div style="font-size: 2rem; font-weight: 900; color: var(--accent); margin-bottom: 1rem;">
+                                    Maximum Daily Stake: ${data.recommendations.maximum}
+                                </div>
+                                <p style="color: var(--text-secondary);">
+                                    Never exceed 40% of your bankroll in a single day. This limit ensures sustainable betting and protects against significant losses.
+                                </p>
+                            </div>
+                        </div>
+                    `;
+
+                    showNotification('Advanced bankroll analysis completed!', 'success');
+                } else {
+                    throw new Error('Failed to calculate recommendations');
+                }
+            } catch (error) {
+                console.error('Bankroll calculation error:', error);
+                resultsDiv.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <strong>Calculation Error</strong>
+                            <p>Unable to calculate bankroll recommendations. Please try again.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Enhanced Notification System
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `${type === 'success' ? 'success-message' : 'error-message'}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 2rem;
+                right: 2rem;
+                z-index: 1000;
+                min-width: 350px;
+                animation: slideIn 0.3s ease;
+                box-shadow: var(--shadow-strong);
+            `;
+            
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                <div>${message}</div>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: auto;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        // Update Statistics
+        function updateStats() {
+            document.getElementById('totalAnalyses').textContent = totalAnalyses;
+        }
+
+        // Add animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -368,6 +1413,34 @@
             padding-right: 3rem;
         }
 
+        /* Enhanced Dropdowns */
+        .dropdown-group {
+            position: relative;
+        }
+
+        .dropdown-group.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .dropdown-group.loading::after {
+            content: '';
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--glass);
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .dropdown-group.loading .select-control {
+            background-image: none;
+        }
+
         /* Match Cards */
         .matches-grid {
             display: grid;
@@ -483,11 +1556,32 @@
             color: var(--text-primary);
         }
 
-        .odd-item:hover .odd-value {
+        .odd-item:hover .odd-value,
+        .odd-item:hover .odd-label {
             color: white;
         }
 
-        /* Analysis Section */
+        /* League Filter Section */
+        .league-info {
+            background: var(--glass);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .league-badge {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Analysis Section Enhancements */
         .analysis-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -771,842 +1865,3 @@
 
         .strategy-card li::before {
             content: '✦';
-            position: absolute;
-            left: 0;
-            color: var(--accent);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero-stats {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .form-group {
-                flex-direction: column;
-            }
-
-            .form-control {
-                min-width: 100%;
-            }
-
-            .analysis-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .match-odds {
-                flex-direction: column;
-            }
-
-            .nav-stats {
-                display: none;
-            }
-        }
-
-        /* Scroll Animations */
-        @media (prefers-reduced-motion: no-preference) {
-            .card {
-                opacity: 0;
-                transform: translateY(20px);
-                animation: fadeInUp 0.6s ease forwards;
-            }
-
-            .card:nth-child(1) { animation-delay: 0.1s; }
-            .card:nth-child(2) { animation-delay: 0.2s; }
-            .card:nth-child(3) { animation-delay: 0.3s; }
-            .card:nth-child(4) { animation-delay: 0.4s; }
-
-            @keyframes fadeInUp {
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--glass);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-hover);
-        }
-    </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <i class="fas fa-futbol"></i>
-                <span>BetMaster Pro</span>
-            </div>
-            <div class="nav-stats">
-                <div class="nav-stat">
-                    <div class="nav-stat-value" id="totalAnalyses">0</div>
-                    <div class="nav-stat-label">Analyses</div>
-                </div>
-                <div class="nav-stat">
-                    <div class="nav-stat-value" id="successRate">94%</div>
-                    <div class="nav-stat-label">Success Rate</div>
-                </div>
-                <div class="nav-stat">
-                    <div class="nav-stat-value" id="liveMatches">0</div>
-                    <div class="nav-stat-label">Live Matches</div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container">
-        <!-- Hero Section -->
-        <div class="hero">
-            <h1>Professional Football Analysis</h1>
-            <div class="hero-subtitle">AI-powered insights • Real-time data • Smart predictions</div>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <span class="hero-stat-number">98.7%</span>
-                    <span class="hero-stat-text">Accuracy Rate</span>
-                </div>
-                <div class="hero-stat">
-                    <span class="hero-stat-number">50K+</span>
-                    <span class="hero-stat-text">Predictions Made</span>
-                </div>
-                <div class="hero-stat">
-                    <span class="hero-stat-number">24/7</span>
-                    <span class="hero-stat-text">Live Monitoring</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Today's Matches -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-calendar-day"></i>
-                    Today's Matches
-                </h2>
-                <div class="card-badge">Live Data</div>
-            </div>
-            
-            <div class="form-group">
-                <button class="btn" onclick="loadTodaysMatches()">
-                    <i class="fas fa-sync-alt"></i>
-                    Load Live Matches
-                </button>
-                <select class="form-control select-control" id="leagueFilter" onchange="filterMatches()">
-                    <option value="">All Leagues</option>
-                    <option value="premier-league">Premier League</option>
-                    <option value="champions-league">Champions League</option>
-                    <option value="europa-league">Europa League</option>
-                    <option value="bundesliga">Bundesliga</option>
-                    <option value="serie-a">Serie A</option>
-                    <option value="la-liga">La Liga</option>
-                    <option value="ligue-1">Ligue 1</option>
-                </select>
-            </div>
-            
-            <div id="matchesContainer" class="matches-grid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text">Ready to load today's fixtures</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Match Analysis -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-brain"></i>
-                    AI Match Analysis
-                </h2>
-                <div class="card-badge">Advanced</div>
-            </div>
-            
-            <div class="form-group">
-                <input type="text" class="form-control" id="homeTeamInput" placeholder="Home Team (e.g., Manchester United)">
-                <input type="text" class="form-control" id="awayTeamInput" placeholder="Away Team (e.g., Liverpool)">
-                <button class="btn btn-secondary" onclick="analyzeMatch()">
-                    <i class="fas fa-chart-line"></i>
-                    Analyze Match
-                </button>
-            </div>
-            
-            <div id="analysisResults"></div>
-        </div>
-
-        <!-- Multi-Bet Builder -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-layer-group"></i>
-                    Multi-Bet Builder
-                </h2>
-                <div class="card-badge">Smart Odds</div>
-            </div>
-            
-            <p style="color: var(--text-secondary); margin-bottom: 2rem;">
-                Build intelligent combination bets targeting 1.9-2.5 total odds for optimal returns
-            </p>
-            
-            <div id="selectedMatches" class="selected-matches">
-                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                    <i class="fas fa-plus-circle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                    <p>No matches selected yet. Click on matches above to build your multi-bet combination.</p>
-                </div>
-            </div>
-            
-            <div id="multiBetSummary"></div>
-        </div>
-
-        <!-- Bankroll Management -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-wallet"></i>
-                    Smart Bankroll Management
-                </h2>
-                <div class="card-badge">Risk Control</div>
-            </div>
-            
-            <div class="form-group">
-                <input type="number" class="form-control" id="balanceInput" placeholder="Current Balance ($)" min="1" step="0.01">
-                <button class="btn" onclick="calculateBankroll()">
-                    <i class="fas fa-calculator"></i>
-                    Calculate Recommendations
-                </button>
-            </div>
-            
-            <div id="bankrollResults"></div>
-        </div>
-
-        <!-- Professional Strategy -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-graduation-cap"></i>
-                    Professional Strategy Guide
-                </h2>
-                <div class="card-badge">Expert Tips</div>
-            </div>
-            
-            <div class="strategy-grid">
-                <div class="strategy-card">
-                    <h3><i class="fas fa-chart-bar"></i> Analysis Factors</h3>
-                    <ul>
-                        <li>Recent form analysis (last 6 matches)</li>
-                        <li>Head-to-head historical performance</li>
-                        <li>Home vs away performance metrics</li>
-                        <li>Player injuries and suspensions</li>
-                        <li>Team motivation and stakes</li>
-                        <li>Weather and pitch conditions</li>
-                        <li>Referee tendencies and statistics</li>
-                    </ul>
-                </div>
-                
-                <div class="strategy-card">
-                    <h3><i class="fas fa-shield-alt"></i> Risk Management</h3>
-                    <ul>
-                        <li>Never exceed 40% of total bankroll</li>
-                        <li>Diversify bets across multiple matches</li>
-                        <li>Set daily profit and loss limits</li>
-                        <li>Track all bets for performance analysis</li>
-                        <li>Avoid emotional or revenge betting</li>
-                        <li>Use stop-loss strategies effectively</li>
-                        <li>Maintain detailed betting records</li>
-                    </ul>
-                </div>
-                
-                <div class="strategy-card">
-                    <h3><i class="fas fa-trophy"></i> Winning Strategies</h3>
-                    <ul>
-                        <li>Focus on leagues you understand well</li>
-                        <li>Look for value bets, not just favorites</li>
-                        <li>Consider double chance and draw no bet</li>
-                        <li>Mix conservative and aggressive selections</li>
-                        <li>Use statistical analysis over emotions</li>
-                        <li>Follow line movement and market trends</li>
-                        <li>Time your bets for optimal odds</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Global Variables
-        let allMatches = [];
-        let selectedMatches = [];
-        let totalAnalyses = 0;
-        const API_BASE = window.location.origin;
-
-        // Initialize App
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-            updateStats();
-        });
-
-        function initializeApp() {
-            showWelcomeMessage();
-            animateHeroStats();
-        }
-
-        function showWelcomeMessage() {
-            showNotification('Welcome to BetMaster Pro! Your professional football analysis platform.', 'success');
-        }
-
-        function animateHeroStats() {
-            const stats = document.querySelectorAll('.hero-stat-number');
-            stats.forEach((stat, index) => {
-                setTimeout(() => {
-                    stat.style.animation = 'pulse 0.6s ease';
-                }, index * 200);
-            });
-        }
-
-        // Load Today's Matches
-        async function loadTodaysMatches() {
-            const container = document.getElementById('matchesContainer');
-            const liveMatchesCounter = document.getElementById('liveMatches');
-            
-            container.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text">Fetching live match data from premium sources...</div>
-                </div>
-            `;
-
-            try {
-                const response = await fetch(`${API_BASE}/api/matches/today`);
-                const data = await response.json();
-
-                if (data.success && data.matches) {
-                    allMatches = data.matches;
-                    displayMatches(allMatches);
-                    liveMatchesCounter.textContent = data.matches.length;
-                    showNotification(`Successfully loaded ${data.matches.length} matches for ${data.date}`, 'success');
-                } else {
-                    throw new Error('Failed to fetch matches');
-                }
-            } catch (error) {
-                console.error('Error loading matches:', error);
-                container.innerHTML = `
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div>
-                            <strong>Connection Error</strong>
-                            <p>Unable to fetch live match data. Please check your connection and try again.</p>
-                        </div>
-                    </div>
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <button class="btn" onclick="loadTodaysMatches()">
-                            <i class="fas fa-redo"></i>
-                            Retry Loading
-                        </button>
-                    </div>
-                `;
-            }
-        }
-
-        // Display Matches
-        function displayMatches(matches) {
-            const container = document.getElementById('matchesContainer');
-            
-            if (!matches || matches.length === 0) {
-                container.innerHTML = `
-                    <div class="card" style="text-align: center; padding: 3rem;">
-                        <i class="fas fa-calendar-times" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                        <h3>No Matches Today</h3>
-                        <p>There are no scheduled matches for today in our database. Check back tomorrow for new fixtures!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = matches.map(match => {
-                if (match.isInfo) {
-                    return `
-                        <div class="match-card" style="background: rgba(255, 165, 0, 0.1); cursor: default; border: 1px solid rgba(255, 165, 0, 0.3);">
-                            <div class="match-header">
-                                <div class="match-time">${match.time}</div>
-                                <div class="match-league">${match.league}</div>
-                            </div>
-                            <div class="match-teams">
-                                <div class="match-vs">${match.homeTeam} <span>vs</span> ${match.awayTeam}</div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                return `
-                    <div class="match-card" onclick="selectForBet('${match.id}', '${match.homeTeam}', '${match.awayTeam}', ${match.homeOdds})">
-                        <div class="match-header">
-                            <div class="match-time">${match.time}</div>
-                            <div class="match-league">${match.league}</div>
-                        </div>
-                        <div class="match-teams">
-                            <div class="match-vs">${match.homeTeam} <span>vs</span> ${match.awayTeam}</div>
-                        </div>
-                        <div class="match-odds">
-                            <div class="odd-item">
-                                <div class="odd-label">Home</div>
-                                <div class="odd-value">${match.homeOdds}</div>
-                            </div>
-                            <div class="odd-item">
-                                <div class="odd-label">Draw</div>
-                                <div class="odd-value">${match.drawOdds}</div>
-                            </div>
-                            <div class="odd-item">
-                                <div class="odd-label">Away</div>
-                                <div class="odd-value">${match.awayOdds}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Filter Matches
-        function filterMatches() {
-            const filter = document.getElementById('leagueFilter').value.toLowerCase();
-            if (!allMatches.length) return;
-
-            const filtered = filter 
-                ? allMatches.filter(match => match.league && match.league.toLowerCase().includes(filter.replace('-', ' ')))
-                : allMatches;
-
-            displayMatches(filtered);
-            showNotification(`Filtered to ${filtered.length} matches`, 'success');
-        }
-
-        // Analyze Match
-        async function analyzeMatch() {
-            const homeTeam = document.getElementById('homeTeamInput').value.trim();
-            const awayTeam = document.getElementById('awayTeamInput').value.trim();
-            const resultsDiv = document.getElementById('analysisResults');
-
-            if (!homeTeam || !awayTeam) {
-                showNotification('Please enter both team names for analysis', 'error');
-                return;
-            }
-
-            resultsDiv.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text">Analyzing ${homeTeam} vs ${awayTeam} using AI algorithms...</div>
-                </div>
-            `;
-
-            try {
-                const response = await fetch(`${API_BASE}/api/analyze/${encodeURIComponent(homeTeam)}/${encodeURIComponent(awayTeam)}`);
-                const data = await response.json();
-
-                if (data.success && data.analysis) {
-                    displayAnalysis(data.analysis, homeTeam, awayTeam);
-                    totalAnalyses++;
-                    updateStats();
-                    showNotification('Analysis completed successfully!', 'success');
-                } else {
-                    throw new Error(data.error || 'Analysis failed');
-                }
-            } catch (error) {
-                console.error('Analysis error:', error);
-                resultsDiv.innerHTML = `
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div>
-                            <strong>Analysis Error</strong>
-                            <p>Unable to analyze the match. Please check team names and try again.</p>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        // Display Analysis Results
-        function displayAnalysis(analysis, homeTeam, awayTeam) {
-            const resultsDiv = document.getElementById('analysisResults');
-            
-            resultsDiv.innerHTML = `
-                <div class="success-message" style="margin-bottom: 2rem;">
-                    <i class="fas fa-check-circle"></i>
-                    <div>
-                        <strong>Analysis Complete</strong>
-                        <p>AI has processed ${homeTeam} vs ${awayTeam} using 15+ statistical factors</p>
-                    </div>
-                </div>
-
-                <div class="analysis-grid">
-                    <div class="team-analysis">
-                        <div class="team-name">${homeTeam} (Home)</div>
-                        <div class="stat-item">
-                            <span class="stat-label">Recent Form</span>
-                            <span class="stat-value">${analysis.homeStats.recentForm}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Goals Per Game</span>
-                            <span class="stat-value">${analysis.homeStats.goalsFor}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Goals Conceded</span>
-                            <span class="stat-value">${analysis.homeStats.goalsAgainst}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Home Win Rate</span>
-                            <span class="stat-value">${analysis.homeStats.homeWinRate}%</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Clean Sheets</span>
-                            <span class="stat-value">${analysis.homeStats.cleanSheets}%</span>
-                        </div>
-                        <div class="confidence-meter">
-                            <div class="confidence-fill" style="width: ${analysis.homeStats.confidence}%"></div>
-                        </div>
-                        <div style="text-align: center; font-weight: 700; color: var(--accent);">
-                            ${analysis.homeStats.confidence}% Confidence Rating
-                        </div>
-                    </div>
-
-                    <div class="team-analysis">
-                        <div class="team-name">${awayTeam} (Away)</div>
-                        <div class="stat-item">
-                            <span class="stat-label">Recent Form</span>
-                            <span class="stat-value">${analysis.awayStats.recentForm}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Goals Per Game</span>
-                            <span class="stat-value">${analysis.awayStats.goalsFor}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Goals Conceded</span>
-                            <span class="stat-value">${analysis.awayStats.goalsAgainst}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Away Win Rate</span>
-                            <span class="stat-value">${analysis.awayStats.awayWinRate}%</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Clean Sheets</span>
-                            <span class="stat-value">${analysis.awayStats.cleanSheets}%</span>
-                        </div>
-                        <div class="confidence-meter">
-                            <div class="confidence-fill" style="width: ${analysis.awayStats.confidence}%"></div>
-                        </div>
-                        <div style="text-align: center; font-weight: 700; color: var(--accent);">
-                            ${analysis.awayStats.confidence}% Confidence Rating
-                        </div>
-                    </div>
-                </div>
-
-                <div class="recommendation">
-                    <div class="recommendation-content">
-                        <h3><i class="fas fa-bullseye"></i> AI Recommendation</h3>
-                        <div class="recommendation-bet">${analysis.recommendation.bet}</div>
-                        <div class="recommendation-odds">${analysis.recommendation.odds}</div>
-                        <div style="font-size: 1.1rem; margin: 1rem 0;">
-                            <strong>${analysis.recommendation.confidence}% Confidence</strong> • ${analysis.recommendation.type}
-                        </div>
-                        ${analysis.recommendation.reasoning ? `<p style="font-style: italic;">${analysis.recommendation.reasoning}</p>` : ''}
-                    </div>
-                </div>
-
-                ${analysis.analysis ? `
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem;">
-                        <div class="card" style="margin: 0;">
-                            <h4><i class="fas fa-info-circle"></i> Key Factors</h4>
-                            <ul style="list-style: none; padding: 0; margin-top: 1rem;">
-                                ${analysis.analysis.keyFactors.map(factor => `
-                                    <li style="padding: 0.5rem 0; color: var(--text-secondary); position: relative; padding-left: 1.5rem;">
-                                        <i class="fas fa-check-circle" style="position: absolute; left: 0; color: var(--accent);"></i>
-                                        ${factor}
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                        <div class="card" style="margin: 0;">
-                            <h4><i class="fas fa-exclamation-triangle"></i> Risk Considerations</h4>
-                            <ul style="list-style: none; padding: 0; margin-top: 1rem;">
-                                ${analysis.analysis.riskFactors.map(risk => `
-                                    <li style="padding: 0.5rem 0; color: var(--text-secondary); position: relative; padding-left: 1.5rem;">
-                                        <i class="fas fa-exclamation-circle" style="position: absolute; left: 0; color: var(--warning-gradient);"></i>
-                                        ${risk}
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                ` : ''}
-            `;
-
-            // Animate confidence meters
-            setTimeout(() => {
-                const fills = document.querySelectorAll('.confidence-fill');
-                fills.forEach(fill => {
-                    const width = fill.style.width;
-                    fill.style.width = '0%';
-                    setTimeout(() => {
-                        fill.style.width = width;
-                    }, 100);
-                });
-            }, 500);
-        }
-
-        // Select Match for Multi-bet
-        function selectForBet(matchId, homeTeam, awayTeam, odds) {
-            const existingMatch = selectedMatches.find(m => m.id === matchId);
-            if (existingMatch) {
-                showNotification('This match is already in your multi-bet selection', 'error');
-                return;
-            }
-
-            selectedMatches.push({
-                id: matchId,
-                homeTeam: homeTeam,
-                awayTeam: awayTeam,
-                odds: parseFloat(odds),
-                selection: `${homeTeam} Win`
-            });
-
-            updateMultiBetDisplay();
-            showNotification(`Added ${homeTeam} vs ${awayTeam} to your multi-bet`, 'success');
-        }
-
-        // Update Multi-bet Display
-        function updateMultiBetDisplay() {
-            const container = document.getElementById('selectedMatches');
-            const summary = document.getElementById('multiBetSummary');
-
-            if (selectedMatches.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                        <i class="fas fa-plus-circle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                        <p>No matches selected yet. Click on matches above to build your multi-bet combination.</p>
-                    </div>
-                `;
-                summary.innerHTML = '';
-                return;
-            }
-
-            container.innerHTML = `
-                <h4 style="color: var(--accent); margin-bottom: 1rem;">
-                    <i class="fas fa-list"></i> Selected Matches (${selectedMatches.length})
-                </h4>
-                ${selectedMatches.map((match, index) => `
-                    <div class="selected-match">
-                        <div>
-                            <strong>${match.homeTeam} vs ${match.awayTeam}</strong>
-                            <br>
-                            <small style="color: var(--text-muted);">${match.selection} • Odds: ${match.odds}</small>
-                        </div>
-                        <button class="btn btn-danger btn-sm" onclick="removeFromMultiBet(${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `).join('')}
-            `;
-
-            const totalOdds = selectedMatches.reduce((total, match) => total * match.odds, 1);
-            const isOptimal = totalOdds >= 1.9 && totalOdds <= 2.5;
-            const potentialReturn = (totalOdds * 100).toFixed(2);
-
-            summary.innerHTML = `
-                <div class="multi-bet-summary">
-                    <h3><i class="fas fa-calculator"></i> Multi-Bet Summary</h3>
-                    <div class="multi-bet-odds">${totalOdds.toFixed(2)}</div>
-                    <div style="margin: 1rem 0;">
-                        <span style="display: inline-block; padding: 0.5rem 1rem; border-radius: 20px; background: ${isOptimal ? 'var(--success-gradient)' : 'var(--warning-gradient)'}; color: white; font-weight: 600;">
-                            ${isOptimal ? '✅ Optimal Range (1.9-2.5)' : '⚠️ Outside Target Range'}
-                        </span>
-                    </div>
-                    <p style="opacity: 0.9;">
-                        ${selectedMatches.length} selections • $100 bet returns ${potentialReturn}
-                    </p>
-                </div>
-            `;
-        }
-
-        // Remove Match from Multi-bet
-        function removeFromMultiBet(index) {
-            const removedMatch = selectedMatches[index];
-            selectedMatches.splice(index, 1);
-            updateMultiBetDisplay();
-            showNotification(`Removed ${removedMatch.homeTeam} vs ${removedMatch.awayTeam}`, 'success');
-        }
-
-        // Calculate Bankroll
-        async function calculateBankroll() {
-            const balance = parseFloat(document.getElementById('balanceInput').value);
-            const resultsDiv = document.getElementById('bankrollResults');
-
-            if (!balance || balance <= 0) {
-                showNotification('Please enter a valid balance amount', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/api/calculate-bet`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ balance: balance })
-                });
-
-                const data = await response.json();
-
-                if (data.success && data.recommendations) {
-                    resultsDiv.innerHTML = `
-                        <div class="success-message" style="margin: 2rem 0;">
-                            <i class="fas fa-check-circle"></i>
-                            <div>
-                                <strong>Bankroll Analysis Complete</strong>
-                                <p>Calculated optimal bet sizes based on your ${balance.toLocaleString()} balance</p>
-                            </div>
-                        </div>
-
-                        <div class="strategy-grid" style="margin-top: 2rem;">
-                            <div class="card" style="margin: 0; background: var(--success-gradient);">
-                                <h3 style="color: white; margin-bottom: 1rem;">
-                                    <i class="fas fa-shield-alt"></i> Conservative (20%)
-                                </h3>
-                                <div style="font-size: 2.5rem; font-weight: 900; color: white; margin-bottom: 1rem;">
-                                    ${data.recommendations.conservative}
-                                </div>
-                                <p style="color: white; opacity: 0.9;">Safest approach for long-term growth</p>
-                            </div>
-
-                            <div class="card" style="margin: 0; background: var(--primary-gradient);">
-                                <h3 style="color: white; margin-bottom: 1rem;">
-                                    <i class="fas fa-balance-scale"></i> Moderate (30%)
-                                </h3>
-                                <div style="font-size: 2.5rem; font-weight: 900; color: white; margin-bottom: 1rem;">
-                                    ${data.recommendations.moderate}
-                                </div>
-                                <p style="color: white; opacity: 0.9;">Balanced risk-reward ratio</p>
-                            </div>
-
-                            <div class="card" style="margin: 0; background: var(--warning-gradient);">
-                                <h3 style="color: white; margin-bottom: 1rem;">
-                                    <i class="fas fa-fire"></i> Aggressive (40%)
-                                </h3>
-                                <div style="font-size: 2.5rem; font-weight: 900; color: white; margin-bottom: 1rem;">
-                                    ${data.recommendations.aggressive}
-                                </div>
-                                <p style="color: white; opacity: 0.9;">Maximum recommended stake</p>
-                            </div>
-                        </div>
-
-                        <div class="card" style="background: var(--glass); border: 2px solid var(--accent); margin-top: 2rem;">
-                            <div style="text-align: center;">
-                                <h3 style="color: var(--accent); margin-bottom: 1rem;">
-                                    <i class="fas fa-exclamation-circle"></i> Professional Recommendation
-                                </h3>
-                                <div style="font-size: 2rem; font-weight: 900; color: var(--accent); margin-bottom: 1rem;">
-                                    Maximum Daily Stake: ${data.recommendations.maximum}
-                                </div>
-                                <p style="color: var(--text-secondary);">
-                                    Never exceed 40% of your bankroll in a single day. This limit ensures sustainable betting and protects against significant losses.
-                                </p>
-                            </div>
-                        </div>
-                    `;
-
-                    showNotification('Bankroll recommendations calculated successfully!', 'success');
-                } else {
-                    throw new Error('Failed to calculate recommendations');
-                }
-            } catch (error) {
-                console.error('Bankroll calculation error:', error);
-                resultsDiv.innerHTML = `
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div>
-                            <strong>Calculation Error</strong>
-                            <p>Unable to calculate bankroll recommendations. Please try again.</p>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        // Notification System
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `${type === 'success' ? 'success-message' : 'error-message'}`;
-            notification.style.cssText = `
-                position: fixed;
-                top: 2rem;
-                right: 2rem;
-                z-index: 1000;
-                min-width: 300px;
-                animation: slideIn 0.3s ease;
-            `;
-            
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-                <div>${message}</div>
-            `;
-
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 4000);
-        }
-
-        // Update Statistics
-        function updateStats() {
-            document.getElementById('totalAnalyses').textContent = totalAnalyses;
-        }
-
-        // Add animation keyframes
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
-</body>
-</html>
