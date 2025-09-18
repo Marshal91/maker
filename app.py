@@ -156,10 +156,15 @@ def populate_leagues_and_teams():
                     'country': 'Europe',
                     'api_id': 'CL',
                     'teams': [
-                        'Real Madrid', 'Manchester City', 'Barcelona', 'Bayern Munich',
-                        'PSG', 'Liverpool', 'Arsenal', 'Atletico Madrid',
-                        'Inter Milan', 'Napoli', 'Borussia Dortmund', 'AC Milan',
-                        'Chelsea', 'Juventus', 'AS Roma', 'Sevilla'
+                        'AFC Ajax', 'Arsenal', 'Atalanta', 'Athletic Club', 
+                        'Atletico Madrid', 'Borussia Dortmund', 'Barcelona', 'Bayern Munich',
+                        'Benfica', 'Bodo/Glimt', 'Chelsea', 'Club Brugge',
+                        'FC Copenhagen', 'Eintracht Frankfurt', 'Galatasaray', 'Inter Milan',
+                        'Juventus', 'Kairat Almaty', 'Bayer Leverkusen', 'Liverpool',
+                        'Manchester City', 'Marseille', 'AS Monaco', 'Napoli',
+                        'Newcastle United', 'Olympiacos', 'Pafos FC', 'Paris Saint-Germain',
+                        'PSV Eindhoven', 'Qarabag FK', 'Real Madrid', 'Slavia Praha',
+                        'Sporting CP', 'Tottenham', 'Union Saint-Gilloise', 'Villarreal'
                     ]
                 },
                 'Europa League': {
@@ -464,7 +469,14 @@ class EnhancedFootballAPI:
                             all_matches['serie-a'][:1] + 
                             all_matches['bundesliga'][:1])
         elif day_of_week == 2:  # Wednesday - European competitions
-            selected_teams = all_matches['champions-league']
+            champions_league_matches = [
+                ('Real Madrid', 'Manchester City', 'Champions League'),
+                ('Barcelona', 'Bayern Munich', 'Champions League'),
+                ('Arsenal', 'PSG', 'Champions League'),
+                ('Liverpool', 'Atletico Madrid', 'Champions League'),
+                ('Inter Milan', 'Borussia Dortmund', 'Champions League'),
+                ('Chelsea', 'Juventus', 'Champions League'),
+            ]
         else:
             return [{
                 'id': 'info-no-matches',
