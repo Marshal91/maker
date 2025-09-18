@@ -388,7 +388,7 @@ class EnhancedAnalyzer:
             'Barcelona': ['Real Madrid', 'Atletico Madrid', 'Sevilla', 'Valencia', 'Athletic Bilbao'],
             'Bayern Munich': ['Borussia Dortmund', 'RB Leipzig', 'Bayer Leverkusen', 'Union Berlin'],
             'Inter Milan': ['AC Milan', 'Juventus', 'Napoli', 'AS Roma', 'Lazio'],
-            'PSG': ['AS Monaco', 'Marseille', 'Lyon', 'Lille', 'Nice']
+            'PSG': ['AS Monaco', 'Marseille', 'Olympique Lyon', 'Lille', 'Nice']
         }
         
         # Return specific opponents or generic ones
@@ -643,6 +643,23 @@ def get_leagues():
             
             return jsonify({
                 'success': True,
+                'leagues': [dict(league) for league in leagues]
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/teams/<int:league_id>')
+def get_teams_by_league(league_id):
+    """Get teams for a specific league"""
+    try:
+        with get_db() as conn:
+            teams = conn.execute(
+                'SELECT id, name FROM teams WHERE league_id = ? ORDER BY name',
+                (league_id,)
+            ).fetchall()
+            
+            return jsonify({
+                'success': True,
                 'teams': [dict(team) for team in teams]
             })
     except Exception as e:
@@ -745,21 +762,4 @@ def internal_error(error):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port),
-                'leagues': [dict(league) for league in leagues]
-            })
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/teams/<int:league_id>')
-def get_teams_by_league(league_id):
-    """Get teams for a specific league"""
-    try:
-        with get_db() as conn:
-            teams = conn.execute(
-                'SELECT id, name FROM teams WHERE league_id = ? ORDER BY name',
-                (league_id,)
-            ).fetchall()
-            
-            return jsonify({
-                'success': True
+    app.run(host='0.0.0.0', port=port)
